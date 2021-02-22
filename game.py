@@ -25,28 +25,44 @@ import random
 #window.mainloop()
 
 
+#живые клетки черным цветом. мертвые клетки - белым
+
+
 class GameOfLife():
-    grid_size = 40
-    squere_size = 20
-    window = Tk()
-    c = Canvas(window, width=800, height=800, bg='black')
-    
-    
-    
-    def __init__(self, grid_size, squere_size):
+
+    def __init__(self, grid_size, squere_size):       
         self.grid_size = grid_size
         self.squere_size = squere_size
+        self.window = Tk()
+        self.c = Canvas(self.window, width=600, height=600, bg='black')
 
-    def run_game(self):
+    def run(self):
+        
         for i in range(self.grid_size): #ширина
 
             for j in range(self.grid_size): #длина
-                c.create_rectangle(i * self.grid_size, j * self.grid_size, i * self.grid_size + self.grid_size, j * self.grid_size + self.grid_size, fill="white")
+                self.c.create_rectangle(i * self.squere_size, j * self.squere_size, i * self.squere_size + self.squere_size, j * self.squere_size + self.squere_size, fill="white")
+      
+        self.rand()
 
-        
-        
-    window.title("Game of life")
-    c.pack()
-    window.mainloop()
+    def rand(self):
+        #a = 0
+        #b = 0
+        for i in range(self.grid_size):
 
+            for j in range(self.grid_size):
+                a = random.randint(0, 40)
+                b = random.randint(0, 40)
+                #создает эллипсы внутри фигуры, следовательно, если хочу получить круг, то описываемой фигурой будет квадрат
+                self.c.create_oval(self.squere_size*a, self.squere_size*b, self.squere_size*a + self.squere_size, self.squere_size*b + self.squere_size, fill="black", outline="white")
+        
+        self.window.title("Game of life")
+        self.c.pack()
+        self.window.mainloop()
+        
+    
+    
+
+game  = GameOfLife(30, 20)
+game.run()
 

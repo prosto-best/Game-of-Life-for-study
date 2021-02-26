@@ -1,12 +1,12 @@
 from tkinter import *
 import random
 import numpy as np
+import keyboard
 #GRID_SIZE = 30 #Ширина и высота игрового поля
 #SQUARE_SIZE = 20 #Размер одной клетки на поле
-
-
-
 #живые клетки черным цветом. мертвые клетки - белым
+#Я допустил кое-какую ошибку в разработке: я сначала создал рандомные кружки на поле, а потом по ним делал матрицу; можно было все сделать
+#гораздо проще: сначала надо было создать матрицу с рандомными в ней единичками и ноликами и потом уже по ней создавать рисунок вывода =)
 
 
 class GameOfLife():
@@ -39,7 +39,7 @@ class GameOfLife():
                 a = random.randint(0, 29)
                 b = random.randint(0, 29)
                 #создает эллипсы внутри фигуры, следовательно, если хочу получить круг, то описываемой фигурой будет квадрат
-                self.c.create_oval(self.squere_size*a, self.squere_size*b, self.squere_size*a + self.squere_size, self.squere_size*b + self.squere_size, fill="black", outline="white")
+                self.c.create_oval(self.squere_size*a, self.squere_size*b, self.squere_size*a + self.squere_size, self.squere_size*b + self.squere_size, fill="black", outline="white", tag="some-tag")
                 arr[b][a] = 1
 
 
@@ -47,7 +47,7 @@ class GameOfLife():
 
         self.window.title("Game of life")
         self.c.pack()
-        self.window.mainloop()
+        #self.window.mainloop()
         self.check(arr)
 
     ''' 
@@ -62,11 +62,12 @@ class GameOfLife():
     #Нужно складывать цифры всех соседей(по вертикали, по горизонтали, по  двум диагоналям) с шагом в одну клетку какой 
     #то клетки в матрице и проверять их сумму,
     #если, к примеру, сумма равна 2 или 3 житель выживает и переходит в следующее поколение
+
+
     def check(self, arr):
         for i in range(self.grid_size):
-            #print(i)
             for j in range(self.grid_size):
-                #Здесь проверем матрицу не взяв во внимание углы, для отдельные условия
+            #Здесь проверем матрицу не взяв во внимание углы, для отдельные условия
                 if i > 0 and i < 29:
                     if j > 0 and j < 29:
                         #Условие выполняется если клетка мертва и рядом с ней, с шагом в одну клетку, три живые
@@ -75,7 +76,12 @@ class GameOfLife():
                                 arr[i][j] = 1
 
                         else:
-                            continue
+                            if (arr[i+1][j] + arr[i-1][j] + arr[i+1][j+1] + arr[i+1][j-1] + arr[i-1][j+1] + arr[i-1][j-1] + arr[i][j-1] + arr[i][j+1]) == 2 or (arr[i+1][j] + arr[i-1][j] + arr[i+1][j+1] + arr[i+1][j-1] + arr[i-1][j+1] + arr[i-1][j-1] + arr[i][j-1] + arr[i][j+1]) == 3:
+                                arr[i][j] = 1
+
+                            else:
+                                arr[i][j] = 0
+
                     else:
                         if arr[i][j] == 0:
                             #Левая боковая грань матрицы без самой первой и самой последеней ячейки
@@ -89,12 +95,27 @@ class GameOfLife():
                                     arr[i][j] = 1
 
                         else:
-                            continue
+                            #Левая боковая грань матрицы без самой первой и самой последеней ячейки
+                            if j == 0:
+                                if arr[i+1][j] + arr[i-1][j] + arr[i+1][j+1] + arr[i-1][j+1] + arr[i][j+1] == 2 or arr[i+1][j] + arr[i-1][j] + arr[i+1][j+1] + arr[i-1][j+1] + arr[i][j+1] == 3:
+                                    arr[i][j] = 1
+
+                                else:
+                                    arr[i][j] = 0
+
+                            #Правая боковая грань матрицы без самой первой и самой последеней ячейки
+                            elif j == 29:
+                                if arr[i+1][j] + arr[i-1][j] + arr[i+1][j-1] + arr[i-1][j-1] + arr[i][j-1] == 2 or arr[i+1][j] + arr[i-1][j] + arr[i+1][j-1] + arr[i-1][j-1] + arr[i][j-1] == 3:
+                                    arr[i][j] = 1
+
+                                else:
+                                    arr[i][j] = 0
+                            
                             
 
                 else:
                     if arr[i][j] == 0:
-                    #Верхняя грань не считая самой первой и самой последней ячейки
+                        #Верхняя грань не считая самой первой и самой последней ячейки
                         if (i == 0) and (j > 0) and (j < 29):
                             if arr[i][j-1] + arr[i][j+1] + arr[i+1][j] + arr[i+1][j-1] + arr[i+1][j+1] == 3:
                                 arr[i][j] = 1
@@ -124,18 +145,76 @@ class GameOfLife():
                             if arr[i-1][j] + arr[i-1][j-1] + arr[i][j-1] == 3:
                                 arr[i][j] = 1
 
-                        
+                    
+                    #Проверка условий когда клетка живая(т.е единичка в матрице)    
                     else:
-                        continue
+                        #Верхняя грань не считая самой первой и самой последней ячейки
+                        if (i == 0) and (j > 0) and (j < 29):
+                            if arr[i][j-1] + arr[i][j+1] + arr[i+1][j] + arr[i+1][j-1] + arr[i+1][j+1] == 2 or arr[i][j-1] + arr[i][j+1] + arr[i+1][j] + arr[i+1][j-1] + arr[i+1][j+1] == 3:
+                                arr[i][j] = 1
 
+                            else:
+                                arr[i][j] = 0
 
-                            
+                        #Нижняя грань не считая самой первой и самой последней ячейки
+                        elif (i == 29) and (j > 0) and (j < 29):
+                            if arr[i][j-1] + arr[i][j+1] + arr[i-1][j-1] + arr[i-1][j+1] + arr[i-1][j] == 2 or arr[i][j-1] + arr[i][j+1] + arr[i-1][j-1] + arr[i-1][j+1] + arr[i-1][j] == 3:
+                                arr[i][j] = 1
+
+                            else:
+                                arr[i][j] = 0
+
+                        #Здесь мы проверяем четыре угла матрицы на наличие нуля и применяем к ним инвидуальные условия проверки суммы соседей                   
+                        #Верхний левый угол матрицы
+                        elif j == 0 and i == 0:
+                            if arr[i+1][j] + arr[i+1][j+1] + arr[i][j+1] == 2 or arr[i+1][j] + arr[i+1][j+1] + arr[i][j+1] == 3:
+                                arr[i][j] = 1
+
+                            else:
+                                arr[i][j] = 0
+                        #Верхний правый угол
+                        elif j == 29 and i == 0:
+                            if arr[i+1][j] + arr[i+1][j-1] + arr[i][j-1] == 2 or arr[i+1][j] + arr[i+1][j-1] + arr[i][j-1] == 3:
+                                arr[i][j] = 1
+
+                            else:
+                                arr[i][j] = 0
+                        #Нижний левый угол
+                        elif j == 0 and i == 29:
+                            if arr[i-1][j] + arr[i-1][j+1] + arr[i][j+1] == 2 or arr[i-1][j] + arr[i-1][j+1] + arr[i][j+1] == 3:
+                                arr[i][j] = 1
+
+                            else:
+                                arr[i][j] = 0
+
+                        #Нижний правый угол
+                        elif j == 29 and i == 29:
+                            if arr[i-1][j] + arr[i-1][j-1] + arr[i][j-1] == 2 or arr[i-1][j] + arr[i-1][j-1] + arr[i][j-1] == 3:
+                                arr[i][j] = 1
+
+                            else:
+                                arr[i][j] = 0
 
         print("New array: ")
         print(arr)
+        self.create_new_generation(arr)
 
+    
+    def create_new_generation(self, arr):
+        self.c.delete("some-tag")#Удаляем всех житиелей, чтобы спроецировать их по новой матрице
 
-        #self.window.mainloop()
+        for i in range(self.grid_size):
+            for j in range(self.grid_size):
+                
+                if arr[i][j] == 1:
+                    self.c.create_oval(self.squere_size*j, self.squere_size*i, self.squere_size*j + self.squere_size, self.squere_size*i + self.squere_size, fill="black", outline="white")
+
+                else:
+                    continue
+
+        self.c.pack()
+        self.window.mainloop()
+        self.check(arr)
 
 
     

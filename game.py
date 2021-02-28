@@ -1,4 +1,5 @@
 from tkinter import *
+import time
 import random
 import numpy as np
 import keyboard
@@ -11,7 +12,9 @@ import keyboard
 
 class GameOfLife():
 
-    def __init__(self, grid_size, squere_size):       
+    def __init__(self, grid_size, squere_size, count, count_max):
+        self.count_max = count_max
+        self.count = count   
         self.grid_size = grid_size
         self.squere_size = squere_size
         self.window = Tk()
@@ -23,7 +26,7 @@ class GameOfLife():
             for j in range(self.grid_size): #длина
                 self.c.create_rectangle(i * self.squere_size, j * self.squere_size, i * self.squere_size + self.squere_size, j * self.squere_size + self.squere_size, fill="white")
         
-
+        #self.c.pack()
         self.create_matrix()
 
     def create_matrix(self): #создаем нулевую матрицу, т.к еще не создали жителей(это в следующей функцие) с заданными значениями 
@@ -65,6 +68,9 @@ class GameOfLife():
 
 
     def check(self, arr):
+        self.count += 1
+
+
         for i in range(self.grid_size):
             for j in range(self.grid_size):
             #Здесь проверем матрицу не взяв во внимание углы, для отдельные условия
@@ -203,23 +209,45 @@ class GameOfLife():
     def create_new_generation(self, arr):
         self.c.delete("some-tag")#Удаляем всех житиелей, чтобы спроецировать их по новой матрице
 
-        for i in range(self.grid_size):
-            for j in range(self.grid_size):
+        if self.count_max > self.count:
+            #self.window.destroy()
+            self.check(arr)
+
+        else:
+
+            for i in range(self.grid_size):
+                for j in range(self.grid_size):
+                    
+                    if arr[i][j] == 1:
+                        self.c.create_oval(self.squere_size*j, self.squere_size*i, self.squere_size*j + self.squere_size, self.squere_size*i + self.squere_size, fill="black", outline="white")
+
+                    else:
+                        continue
+
+            self.c.pack()
+            self.window.mainloop()
+        
+        
+
+        
+
+        
+        #self.window.mainloop()
+        #while True:
+         #   if keyboard.is_pressed('enter'):
+          #      self.window.mainloop()
+           #     time.sleep(3)
+            #    self.window.destroy()
                 
-                if arr[i][j] == 1:
-                    self.c.create_oval(self.squere_size*j, self.squere_size*i, self.squere_size*j + self.squere_size, self.squere_size*i + self.squere_size, fill="black", outline="white")
+                
 
-                else:
-                    continue
-
-        self.c.pack()
-        self.window.mainloop()
-        self.check(arr)
+            #elif keyboard.is_pressed('q'):
+             #   break
 
 
     
   
 
-game  = GameOfLife(30, 20)
+game  = GameOfLife(30, 20, 0, 11)
 game.run()
 
